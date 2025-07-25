@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/slack-go/slack"
+	"github.com/zakkbob/slide/internal"
 )
 
 type application struct {
@@ -13,6 +14,7 @@ type application struct {
 	channelID string
 	client    *slack.Client
 	logger    slog.Logger
+	game      internal.Game
 }
 
 func main() {
@@ -35,11 +37,18 @@ func main() {
 
 	client := slack.New(*apikey, slack.OptionDebug(*debug))
 
+	solution := []string{
+		":one:", ":two:", ":three:", ":four:", ":five:", ":six:",
+	}
+	game := internal.NewGame(solution, 3, 2)
+	game.Randomise()
+
 	app := application{
 		debug:     *debug,
 		channelID: *channelID,
 		logger:    *logger,
 		client:    client,
+		game:      game,
 	}
 
 	app.startGame()

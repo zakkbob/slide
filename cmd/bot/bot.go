@@ -13,6 +13,9 @@ func (a *application) startGame() {
 		os.Exit(1)
 	}
 
+	gameText := slack.NewTextBlockObject("plain_text", a.game.String(), true, false)
+	gameSection := slack.NewSectionBlock(gameText, nil, nil)
+
 	upBtnText := slack.NewTextBlockObject("plain_text", ":upvote:", true, false)
 	upBtn := slack.NewButtonBlockElement("", "click_me", upBtnText)
 	leftBtnText := slack.NewTextBlockObject("plain_text", ":leftvote:", true, false)
@@ -25,6 +28,7 @@ func (a *application) startGame() {
 	arrowBlock := slack.NewActionBlock("", leftBtn, downBtn, upBtn, rightBtn)
 
 	msg := slack.NewBlockMessage(
+		gameSection,
 		arrowBlock,
 	)
 
