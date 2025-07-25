@@ -3,6 +3,8 @@ package internal
 import (
 	"math"
 	"math/rand"
+	"regexp"
+	"slices"
 	"strings"
 )
 
@@ -14,6 +16,32 @@ type Game struct {
 	length   int    // Length of arrays - width*height
 	gapVal   string // String to replace the gap position with
 	gap      int    // Position of gap
+}
+
+func GameFromString(s string) Game {
+	height := strings.Count(s, "\n")
+
+	regex := regexp.MustCompile(":.*?:")
+	solution := regex.FindAllString(s, -1)
+
+	length := len(solution)
+
+	// Okay, so turns out i forgot about the solution thing. So this is a hacky fix for now. Might need a database :(
+	tiles := make([]int, length)
+
+	for i := range length {
+		tiles[i] = i
+	}
+
+	return Game{
+		solution: solution,
+		tiles:    tiles,
+		height:   height,
+		length:   length,
+		width:    length / height,
+		gapVal:   ":blank:",
+		gap:      slices.Index(solution, ":blank:"),
+	}
 }
 
 func NewGame(solution []string, width int, height int, gapVal string) Game {

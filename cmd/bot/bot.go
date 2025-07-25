@@ -6,45 +6,65 @@ import (
 	"net/http"
 
 	"github.com/slack-go/slack"
+	"github.com/zakkbob/slide/internal"
 )
 
-func (s *slackGame) handleAction(token string) func(w http.ResponseWriter, r *http.Request) {
+func (a *application) gameString(i slack.InteractionCallback) string {
+	for _, block := range i.Message.Blocks.BlockSet {
+		if block.ID() == "game" && block.BlockType() == slack.MBTSection {
+			sectionBlock, ok := block.(*slack.SectionBlock)
+			if ok {
+				return sectionBlock.Text.Text
+			}
+			panic("not okay!!")
+		}
+	}
+	panic("aghhh")
+}
+
+func (a *application) handleAction() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var i slack.InteractionCallback
-		s.logger.Info(r.FormValue("payload"))
+
 		err := json.Unmarshal([]byte(r.FormValue("payload")), &i)
 		if err != nil {
-			s.logger.Error(err.Error())
+			a.logger.Error(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		for _, action := range i.ActionCallback.BlockActions {
-			s.logger.Info(action.ActionID)
+		timestamp := i.Container.MessageTs
+		channelID := i.Container.ChannelID
 
-			switch action.ActionID {
+		for _, actionStr := range i.ActionCallback.BlockActions {
+			json.Unmarshal([]byte(actionStr.ActionID), &a)
+
+			gameStr := a.gameString(i)
+
+			game := internal.GameFromString(gameStr)
+
+			switch actionStr.ActionID {
 			case "left":
-				s.game.Left()
-				s.updateGame()
-
+				game.Left()
 			case "right":
-				s.game.Right()
-				s.updateGame()
-
+				game.Right()
 			case "up":
-				s.game.Up()
-				s.updateGame()
+				game.Up()
 			case "down":
-				s.game.Down()
-				s.updateGame()
+				game.Down()
+			}
+
+			err := a.updateGame(channelID, timestamp, game)
+			if err != nil {
+				panic(err.Error())
 			}
 		}
 	}
 }
 
-func (s *slackGame) msgOption() slack.MsgOption {
-	gameText := slack.NewTextBlockObject("plain_text", s.game.String(), true, false)
-	gameSection := slack.NewSectionBlock(gameText, nil, nil)
+func (a *application) msgOption(game string) slack.MsgOption {
+	gameText := slack.NewTextBlockObject("plain_text", game, true, false)
+	gameSection := slack.NewSectionBlock(gameText, nil, nil, slack.SectionBlockOptionBlockID("game"))
 
 	upBtnText := slack.NewTextBlockObject("plain_text", ":upvote:", true, false)
 	upBtn := slack.NewButtonBlockElement("up", "click_me", upBtnText)
@@ -63,27 +83,25 @@ func (s *slackGame) msgOption() slack.MsgOption {
 	)
 
 	return slack.MsgOptionBlocks(msg.Blocks.BlockSet...)
-
 }
 
-func (s *slackGame) startGame() error {
-	_, timestamp, err := s.client.PostMessage(s.channelID, s.msgOption())
+func (a *application) startGame(channelID string, game internal.Game) error {
+	_, timestamp, err := a.client.PostMessage(channelID, a.msgOption(game.String()))
 	if err != nil {
 		return fmt.Errorf("failed to start game: %v", err)
 	}
 
-	s.logger.Info("Made a post!", "timestamp", timestamp)
-	s.timestamp = timestamp
+	a.logger.Info("Made a post!", "timestamp", timestamp)
 	return nil
 }
 
-func (s *slackGame) updateGame() error {
-	a, b, c, err := s.client.UpdateMessage(s.channelID, s.timestamp, s.msgOption())
+func (a *application) updateGame(channelID string, timestamp string, game internal.Game) error {
+	d, b, c, err := a.client.UpdateMessage(channelID, timestamp, a.msgOption(game.String()))
 	if err != nil {
 		return fmt.Errorf("failed to update game: %v", err)
 	}
 
-	s.logger.Info("Updated!", "a", a, "b", b, "c", c)
+	a.logger.Info("Updated!", "a", d, "b", b, "c", c)
 	return nil
 
 }

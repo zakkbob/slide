@@ -7,30 +7,20 @@ import (
 	"os"
 
 	"github.com/slack-go/slack"
-	"github.com/zakkbob/slide/internal"
 )
 
-type slackGame struct {
-	debug     bool
-	channelID string
-	timestamp string
-	client    *slack.Client
-	logger    slog.Logger
-	game      internal.Game
+type application struct {
+	debug  bool
+	client *slack.Client
+	logger slog.Logger
 }
 
 func main() {
 	debug := flag.Bool("debug", false, "Debug Mode")
-	channelID := flag.String("channel", "", "Channel ID")
 	apikey := flag.String("apikey", "", "API Key")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-
-	if *channelID == "" {
-		logger.Error("You need to specify a Channel ID using --channel")
-		os.Exit(1)
-	}
 
 	if *apikey == "" {
 		logger.Error("You need to specify an API Key using --apikey")
@@ -39,32 +29,29 @@ func main() {
 
 	client := slack.New(*apikey, slack.OptionDebug(*debug))
 
-	solution := []string{
-		":one:", ":two:", ":three:", ":four:", ":five:", ":six:",
+	app := application{
+		debug:  *debug,
+		logger: *logger,
+		client: client,
 	}
 
-	game := internal.NewGame(solution, 3, 2, ":blank:")
-	//game.Randomise()
+	// solution := []string{
+	// 	":one:", ":two:", ":three:", ":four:", ":five:", ":six:",
+	// }
 
-	logger.Info(game.String())
+	// game := internal.NewGame(solution, 3, 2, ":blank:")
 
-	app := slackGame{
-		debug:     *debug,
-		channelID: *channelID,
-		logger:    *logger,
-		client:    client,
-		game:      game,
-	}
+	// logger.Info(game.String())
 
-	app.game.Randomise()
+	// game.Randomise()
 
-	err := app.startGame()
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
+	// err := app.startGame("C097GSY3X5G", game)
 
-	http.HandleFunc("POST /action", app.handleAction(""))
+	// if err != nil {
+	// 	logger.Error(err.Error())
+	// 	os.Exit(1)
+	// }
+
+	http.HandleFunc("POST /action", app.handleAction())
 	http.ListenAndServe(":4300", nil)
-
 }
