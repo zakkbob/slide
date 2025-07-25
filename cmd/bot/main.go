@@ -40,7 +40,7 @@ func main() {
 	solution := []string{
 		":one:", ":two:", ":three:", ":four:", ":five:", ":six:",
 	}
-	game := internal.NewGame(solution, 3, 2)
+	game := internal.NewGame(solution, 3, 2, ":blank:")
 	game.Randomise()
 
 	app := application{

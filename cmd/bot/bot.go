@@ -7,12 +7,6 @@ import (
 )
 
 func (a *application) startGame() {
-	_, b, err := a.client.PostMessage(a.channelID, slack.MsgOptionText("test", false))
-	if err != nil {
-		a.logger.Error(err.Error())
-		os.Exit(1)
-	}
-
 	gameText := slack.NewTextBlockObject("plain_text", a.game.String(), true, false)
 	gameSection := slack.NewSectionBlock(gameText, nil, nil)
 
@@ -32,7 +26,7 @@ func (a *application) startGame() {
 		arrowBlock,
 	)
 
-	_, b, err = a.client.PostMessage(a.channelID, slack.MsgOptionBlocks(msg.Blocks.BlockSet...))
+	_, b, err := a.client.PostMessage(a.channelID, slack.MsgOptionBlocks(msg.Blocks.BlockSet...))
 	if err != nil {
 		a.logger.Error(err.Error())
 		os.Exit(1)

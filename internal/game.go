@@ -10,11 +10,12 @@ type Game struct {
 	tiles    []int    // Current positions of puzzle. indexes of the solution
 	width    int
 	height   int
-	length   int // Length of arrays - width*height
-	gap      int // Position of gap
+	length   int    // Length of arrays - width*height
+	gapVal   string // String to replace the gap position with
+	gap      int    // Position of gap
 }
 
-func NewGame(solution []string, width int, height int) Game {
+func NewGame(solution []string, width int, height int, gapVal string) Game {
 	length := width * height
 	tiles := make([]int, length)
 
@@ -34,13 +35,21 @@ func NewGame(solution []string, width int, height int) Game {
 
 func (g *Game) Randomise() {
 	g.tiles = rand.Perm(g.length)
+	g.gap = rand.Intn(g.length)
+}
+
+func (g *Game) Tile(i int) string {
+	if i == g.gap {
+		return g.gapVal
+	}
+	return g.solution[i]
 }
 
 func (g *Game) Board() []string {
 	board := make([]string, g.length)
 
 	for i, tile := range g.tiles {
-		board[i] = g.solution[tile]
+		board[i] = g.Tile(tile)
 	}
 
 	return board
@@ -50,7 +59,7 @@ func (g *Game) String() string {
 	builder := strings.Builder{}
 
 	for i, tile := range g.tiles {
-		_, err := builder.WriteString(g.solution[tile])
+		_, err := builder.WriteString(g.Tile(tile))
 		if err != nil {
 			panic(err)
 		}

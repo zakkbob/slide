@@ -13,7 +13,7 @@ func TestGameNew(t *testing.T) {
 		"tile2.0", "tile2.1", "tile2.2", "tile2.3",
 	}
 
-	game := internal.NewGame(solution, 4, 3)
+	game := internal.NewGame(solution, 4, 3, ":blank:")
 	t.Log(game.String())
 
 	game.Randomise()
