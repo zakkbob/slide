@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"math"
 	"math/rand"
 	"strings"
 )
@@ -30,7 +31,72 @@ func NewGame(solution []string, width int, height int, gapVal string) Game {
 		tiles:    tiles,
 		length:   length,
 		gap:      0,
+		gapVal:   gapVal,
 	}
+}
+
+func (g *Game) gapX() int {
+	return g.gap % g.width
+}
+
+func (g *Game) gapY() int {
+	return int(math.Floor(float64(g.gap) / float64(g.width)))
+}
+
+// Moves the gap DOWN, swapping with whatever is there
+// Opposite directions will feel more natural
+func (g *Game) Up() {
+	if g.gapY() >= g.height-1 {
+		return
+	}
+
+	newGap := g.gap + g.width
+
+	g.tiles[g.gap], g.tiles[newGap] = g.tiles[newGap], g.tiles[g.gap]
+	g.gap = newGap
+}
+
+// Moves the gap UP, swapping with whatever is there
+// Opposite directions will feel more natural
+func (g *Game) Down() {
+	if g.gapY() <= 0 {
+		return
+	}
+
+	newGap := g.gap - g.width
+
+	g.tiles[g.gap], g.tiles[newGap] = g.tiles[newGap], g.tiles[g.gap]
+	g.gap = newGap
+}
+
+// Moves the gap RIGHT, swapping with whatever is there
+// Opposite directions will feel more natural
+func (g *Game) Left() {
+	if g.gapX() >= g.width-1 {
+		return
+	}
+
+	newGap := g.gap + 1
+
+	g.tiles[g.gap], g.tiles[newGap] = g.tiles[newGap], g.tiles[g.gap]
+	g.gap = newGap
+}
+
+// Moves the gap LEFT, swapping with whatever is there
+// Opposite directions will feel more natural
+func (g *Game) Right() {
+	if g.gapX() <= 0 {
+		return
+	}
+
+	newGap := g.gap - 1
+
+	g.tiles[g.gap], g.tiles[newGap] = g.tiles[newGap], g.tiles[g.gap]
+	g.gap = newGap
+}
+
+func (g *Game) Gap() int {
+	return g.gap
 }
 
 func (g *Game) Randomise() {
@@ -42,7 +108,7 @@ func (g *Game) Tile(i int) string {
 	if i == g.gap {
 		return g.gapVal
 	}
-	return g.solution[i]
+	return g.solution[g.tiles[i]]
 }
 
 func (g *Game) Board() []string {
@@ -58,8 +124,8 @@ func (g *Game) Board() []string {
 func (g *Game) String() string {
 	builder := strings.Builder{}
 
-	for i, tile := range g.tiles {
-		_, err := builder.WriteString(g.Tile(tile))
+	for i := range g.length {
+		_, err := builder.WriteString(g.Tile(i))
 		if err != nil {
 			panic(err)
 		}

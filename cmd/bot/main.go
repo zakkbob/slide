@@ -41,7 +41,8 @@ func main() {
 		":one:", ":two:", ":three:", ":four:", ":five:", ":six:",
 	}
 	game := internal.NewGame(solution, 3, 2, ":blank:")
-	game.Randomise()
+	//game.Randomise()
+	game.Up()
 
 	app := application{
 		debug:     *debug,
