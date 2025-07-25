@@ -1,13 +1,13 @@
 package main
 
 import (
-	"os"
+	"fmt"
 
 	"github.com/slack-go/slack"
 )
 
-func (a *application) startGame() {
-	gameText := slack.NewTextBlockObject("plain_text", a.game.String(), true, false)
+func (s *slackGame) msgOption() slack.MsgOption {
+	gameText := slack.NewTextBlockObject("plain_text", s.game.String(), true, false)
 	gameSection := slack.NewSectionBlock(gameText, nil, nil)
 
 	upBtnText := slack.NewTextBlockObject("plain_text", ":upvote:", true, false)
@@ -26,12 +26,28 @@ func (a *application) startGame() {
 		arrowBlock,
 	)
 
-	_, b, err := a.client.PostMessage(a.channelID, slack.MsgOptionBlocks(msg.Blocks.BlockSet...))
+	return slack.MsgOptionBlocks(msg.Blocks.BlockSet...)
+
+}
+
+func (s *slackGame) startGame() error {
+	_, timestamp, err := s.client.PostMessage(s.channelID, s.msgOption())
 	if err != nil {
-		a.logger.Error(err.Error())
-		os.Exit(1)
+		return fmt.Errorf("failed to start game: %v", err)
 	}
 
-	a.logger.Info("Made a post!", "timestamp", b)
+	s.logger.Info("Made a post!", "timestamp", timestamp)
+	s.timestamp = timestamp
+	return nil
+}
+
+func (s *slackGame) updateGame() error {
+	a, b, c, err := s.client.UpdateMessage(s.channelID, s.timestamp, s.msgOption())
+	if err != nil {
+		return fmt.Errorf("failed to update game: %v", err)
+	}
+
+	s.logger.Info("Updated!", "a", a, "b", b, "c", c)
+	return nil
 
 }
