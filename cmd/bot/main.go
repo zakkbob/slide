@@ -7,13 +7,9 @@ import (
 	"os"
 
 	"github.com/slack-go/slack"
+	"github.com/zakkbob/slide/pkg"
 )
 
-type application struct {
-	debug  bool
-	client *slack.Client
-	logger slog.Logger
-}
 
 func main() {
 	debug := flag.Bool("debug", false, "Debug Mode")
@@ -29,30 +25,9 @@ func main() {
 
 	client := slack.New(*apikey, slack.OptionDebug(*debug))
 
-	app := application{
-		debug:  *debug,
-		logger: *logger,
-		client: client,
-	}
+	app := pkg.NewApplication(*debug, client, logger)
 
-	// solution := []string{
-	// 	":one:", ":two:", ":three:", ":four:", ":five:", ":six:",
-	// }
-
-	// game := internal.NewGame(solution, 3, 2, ":blank:")
-
-	// logger.Info(game.String())
-
-	// game.Randomise()
-
-	// err := app.startGame("C097GSY3X5G", game)
-
-	// if err != nil {
-	// 	logger.Error(err.Error())
-	// 	os.Exit(1)
-	// }
-
-	http.HandleFunc("POST /action", app.handleAction())
-	http.HandleFunc("POST /slash", app.handleSlash())
+	http.HandleFunc("POST /action", app.HandleAction())
+	http.HandleFunc("POST /slash", app.HandleSlash())
 	http.ListenAndServe(":4300", nil)
 }
