@@ -10,7 +10,7 @@ import (
 	"github.com/zakkbob/slide/pkg"
 )
 
-func ActionHandler(w http.ResponseWriter, r *http.Request) {
+func SlashHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprint(w, "Only POST allowed")
@@ -32,5 +32,5 @@ func ActionHandler(w http.ResponseWriter, r *http.Request) {
 
 	app := pkg.NewApplication(debug, client, logger)
 
-	app.HandleAction()(w, r)
+	app.HandleSlash()(w, r)
 }
