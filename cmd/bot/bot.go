@@ -22,6 +22,31 @@ func (a *application) gameString(i slack.InteractionCallback) string {
 	panic("aghhh")
 }
 
+func (a *application) handleSlash() func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		s, err := slack.SlashCommandParse(r)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		switch s.Command {
+		case "/slide-test":
+			solution := []string{
+				":one:", ":two:", ":three:", ":four:", ":five:", ":six:",
+			}
+			game := internal.NewGame(solution, 3, 2, ":blank:")
+			game.Randomise()
+			
+			a.startGame(s.ChannelID, game)
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
 func (a *application) handleAction() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var i slack.InteractionCallback
@@ -96,12 +121,10 @@ func (a *application) startGame(channelID string, game internal.Game) error {
 }
 
 func (a *application) updateGame(channelID string, timestamp string, game internal.Game) error {
-	d, b, c, err := a.client.UpdateMessage(channelID, timestamp, a.msgOption(game.String()))
+	_, _, _, err := a.client.UpdateMessage(channelID, timestamp, a.msgOption(game.String()))
 	if err != nil {
 		return fmt.Errorf("failed to update game: %v", err)
 	}
 
-	a.logger.Info("Updated!", "a", d, "b", b, "c", c)
 	return nil
-
 }

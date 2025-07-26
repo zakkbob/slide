@@ -53,5 +53,6 @@ func main() {
 	// }
 
 	http.HandleFunc("POST /action", app.handleAction())
+	http.HandleFunc("POST /slash", app.handleSlash())
 	http.ListenAndServe(":4300", nil)
 }
