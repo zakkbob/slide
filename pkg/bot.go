@@ -17,8 +17,8 @@ type Application struct {
 }
 
 func NewApplication(debug bool, client *slack.Client, logger *slog.Logger) Application {
-	return Application {
-		debug: debug,
+	return Application{
+		debug:  debug,
 		client: client,
 		logger: logger,
 	}

@@ -7,6 +7,17 @@ import (
 	"github.com/zakkbob/slide/pkg"
 )
 
+func TestCountInversions(t *testing.T) {
+	arr := []int{1, 2, 3, 4}
+	assert.Equal(t, pkg.CountInversions(arr), 0)
+
+	arr = []int{1, 2, 4, 3}
+	assert.Equal(t, pkg.CountInversions(arr), 1)
+
+	arr = []int{2, 1, 0, 3, 5, 6, 4}
+	assert.Equal(t, pkg.CountInversions(arr), 3)
+}
+
 func TestNewGame(t *testing.T) {
 	solution := []string{
 		"1", "2", "3", "4", "5", "6",

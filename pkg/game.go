@@ -127,9 +127,27 @@ func (g *Game) Gap() int {
 	return g.gap
 }
 
+func CountInversions(a []int) int {
+	count := 0
+	for i := 0; i < len(a)-1; i++ {
+		if a[i+1] < a[i] {
+			count++
+		}
+	}
+	return count
+}
+
 func (g *Game) Randomise() {
 	g.tiles = rand.Perm(g.length)
-	g.gap = rand.Intn(g.length)
+
+	// Some permutations aren't solvable!
+	// This fix only works for 3x2 board.
+	// TODO: make work for nxk boards
+	for CountInversions(g.tiles)%2 == 1 {
+		g.tiles = rand.Perm(g.length)
+	}
+
+	g.gap = g.length - 1
 }
 
 func (g *Game) Tile(i int) string {
