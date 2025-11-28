@@ -35,7 +35,7 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 		case "/slide-test":
 			width, height := 2, 3
 
-			args := strings.Split(s.Text, "") // <width> <height>
+			args := strings.Split(strings.Trim(s.Text, " "), "") // <width> <height>
 			switch len(args) {
 			case 0:
 			case 2:
