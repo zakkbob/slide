@@ -85,6 +85,12 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 					game.gapVal = ":blank:"
 					game.DoRandomMoves(game.length * 10)
 				}
+			} else {
+				solution := []string{
+					":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:", ":nine:",
+				}
+				game = NewGame(solution, 3, 2, ":blank:")
+				game.DoRandomMoves(game.length * 10)
 			}
 
 		default:
