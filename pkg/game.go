@@ -53,7 +53,7 @@ func NewGame(solution []string, width int, height int, gapVal string) Game {
 	}
 
 	return Game{
-		solution: solution,
+		solution: solution[:width*height],
 		width:    width,
 		height:   height,
 		tiles:    tiles,
@@ -138,18 +138,28 @@ func CountInversions(a []int) int {
 }
 
 func (g *Game) DoRandomMoves(n int) {
-	for range n {
-		switch rand.Int() % 4 {
+	lastMove := -1
+	for {
+		move := rand.Int() % 4
+		if move == 3-lastMove { // Prevent undoing of last move
+			continue
+		}
+
+		switch move {
 		case 0:
 			g.Up()
 		case 1:
-			g.Down()
-		case 2:
 			g.Left()
-		case 3:
+		case 2:
 			g.Right()
+		case 3:
+			g.Down()
 		}
 
+		n--
+		if n == 0 {
+			return
+		}
 	}
 }
 

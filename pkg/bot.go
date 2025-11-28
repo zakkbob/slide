@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"log/slog"
 
@@ -31,11 +33,40 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 
 		switch s.Command {
 		case "/slide-test":
-			a.Logger.Info("text?", "text", s.Text)
-			solution := []string{
-				":one:", ":two:", ":three:", ":four:", ":five:", ":six:",
+			width, height := 2, 3
+
+			args := strings.Split(s.Text, "") // <width> <height>
+			switch len(args) {
+			case 0:
+			case 2:
+				width, err = strconv.Atoi(args[0])
+				if err != nil {
+					a.Logger.Error("Received invalid command arguments", "command", s.Command, "args", s.Text)
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+				height, err = strconv.Atoi(args[1])
+				if err != nil {
+					a.Logger.Error("Received invalid command arguments", "command", s.Command, "args", s.Text)
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+
+				if !(width > 0 && height > 0 && width*height <= 9) {
+					a.Logger.Error("Received invalid sliding puzzle dimensions", "width", width, "height", height)
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+			default:
+				a.Logger.Error("Received invalid command arguments", "command", s.Command, "args", s.Text)
+				w.WriteHeader(http.StatusBadRequest)
+				return
 			}
-			game := NewGame(solution, 3, 2, ":blank:")
+
+			solution := []string{
+				":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:", ":nine:",
+			}
+			game := NewGame(solution, width, height, ":blank:")
 			game.DoRandomMoves(4)
 
 			a.startGame(s.ChannelID, game)
