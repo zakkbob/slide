@@ -36,57 +36,56 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 
 		var game Game
 
-		switch s.Command {
-		case "/slide-test":
-			width, height := 3, 2
-
-			switch args[0] {
-			case "default", "":
-				args = args[1:]
-
-				if !(len(args) == 0 || len(args) == 2) {
-					a.Logger.Error("Received invalid number of command arguments", "command", s.Command, "args", s.Text, "count", len(args))
-					w.WriteHeader(http.StatusBadRequest)
-					return
-				}
-
-				if len(args) == 2 {
-					width, err = strconv.Atoi(args[0])
-					if err != nil {
-						a.Logger.Error("Failed to parse command arguments", "command", s.Command, "args", s.Text)
-						w.WriteHeader(http.StatusBadRequest)
-						return
-					}
-					height, err = strconv.Atoi(args[1])
-					if err != nil {
-						a.Logger.Error("Failed to parse command arguments", "command", s.Command, "args", s.Text)
-						w.WriteHeader(http.StatusBadRequest)
-						return
-					}
-					if !(width > 0 && height > 0 && width*height <= 9) {
-						a.Logger.Error("Received invalid sliding puzzle dimensions", "width", width, "height", height)
-						w.WriteHeader(http.StatusBadRequest)
-						return
-					}
-				}
-
-				solution := []string{
-					":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:", ":nine:",
-				}
-				game = NewGame(solution, width, height, ":blank:")
-				game.DoRandomMoves(game.length * 10)
-
-			case "custom":
-				gameString := strings.Trim(s.Text[len(args[0])+1:], " ")
-				game = GameFromString(gameString)
-				game.gap = game.length - 1
-				game.gapVal = ":blank:"
-				game.DoRandomMoves(game.length * 10)
-			}
-		default:
+		if s.Command != "/slide-test" {
 			a.Logger.Error("Received unknown command", "command", s.Command)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
+		}
+
+		width, height := 3, 2
+
+		switch args[0] {
+		case "default", "":
+			args = args[1:]
+
+			if !(len(args) == 0 || len(args) == 2) {
+				a.Logger.Error("Received invalid number of command arguments", "command", s.Command, "args", s.Text, "count", len(args))
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			if len(args) == 2 {
+				width, err = strconv.Atoi(args[0])
+				if err != nil {
+					a.Logger.Error("Failed to parse command arguments", "command", s.Command, "args", s.Text)
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+				height, err = strconv.Atoi(args[1])
+				if err != nil {
+					a.Logger.Error("Failed to parse command arguments", "command", s.Command, "args", s.Text)
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+				if !(width > 0 && height > 0 && width*height <= 9) {
+					a.Logger.Error("Received invalid sliding puzzle dimensions", "width", width, "height", height)
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+			}
+
+			solution := []string{
+				":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:", ":nine:",
+			}
+			game = NewGame(solution, width, height, ":blank:")
+			game.DoRandomMoves(game.length * 10)
+
+		case "custom":
+			gameString := strings.Trim(s.Text[len(args[0])+1:], " ")
+			game = GameFromString(gameString)
+			game.gap = game.length - 1
+			game.gapVal = ":blank:"
+			game.DoRandomMoves(game.length * 10)
 		}
 
 		a.startGame(s.ChannelID, game)
