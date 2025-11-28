@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/slack-go/slack"
-	"github.com/zakkbob/slide/pkg"
+	"github.com/zakkbob/slide/internal"
 )
 
 func SlashHandler(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +29,7 @@ func SlashHandler(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info("Received slash command", "host", r.Host)
 
-	app := pkg.Application{
+	app := internal.Application{
 		Debug:  debug,
 		Client: slack.New(apikey, slack.OptionDebug(debug)),
 		Logger: logger,

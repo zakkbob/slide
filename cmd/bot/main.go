@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/slack-go/slack"
-	"github.com/zakkbob/slide/pkg"
+	"github.com/zakkbob/slide/internal"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func main() {
 
 	client := slack.New(*apikey, slack.OptionDebug(*debug))
 
-	app := pkg.Application{
+	app := internal.Application{
 		Debug:  *debug,
 		Client: client,
 		Logger: logger,
