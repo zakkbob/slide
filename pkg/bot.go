@@ -37,7 +37,7 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 
 		switch s.Command {
 		case "/slide-test":
-			width, height, moves := 2, 3, 20
+			width, height := 2, 3
 
 			args := strings.Split(strings.Trim(s.Text, " "), " ") // <width> <height>
 
@@ -46,13 +46,13 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 				case "default":
 					args = args[1:]
 
-					if !(len(args) == 2 || len(args) == 3) {
+					if !(len(args) == 0 || len(args) == 2) {
 						a.Logger.Error("Received invalid number of command arguments", "command", s.Command, "args", s.Text, "count", len(args))
 						w.WriteHeader(http.StatusBadRequest)
 						return
 					}
 
-					if len(args) >= 2 {
+					if len(args) == 2 {
 						width, err = strconv.Atoi(args[0])
 						if err != nil {
 							a.Logger.Error("Failed to parse command arguments", "command", s.Command, "args", s.Text)
@@ -72,25 +72,17 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 						}
 					}
 
-					if len(args) == 3 {
-						moves, err = strconv.Atoi(args[3])
-						if err != nil {
-							a.Logger.Error("Failed to parse command arguments", "command", s.Command, "args", s.Text)
-							w.WriteHeader(http.StatusBadRequest)
-							return
-						}
-					}
-
 					solution := []string{
 						":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:", ":nine:",
 					}
 					game = NewGame(solution, width, height, ":blank:")
-					game.DoRandomMoves(moves)
+					game.DoRandomMoves(game.length * 10)
 
 				case "custom":
 					gameString := strings.Trim(s.Text[len(args[0])+1:], " ")
 					game = GameFromString(gameString)
 					game.gap = game.length - 1
+					game.gapVal = ":blank:"
 					game.DoRandomMoves(game.length * 10)
 				}
 			}
