@@ -137,17 +137,20 @@ func CountInversions(a []int) int {
 	return count
 }
 
-func (g *Game) Randomise() {
-	g.tiles = rand.Perm(g.length)
+func (g *Game) DoRandomMoves(n int) {
+	for range n {
+		switch rand.Int() % 4 {
+		case 0:
+			g.Up()
+		case 1:
+			g.Down()
+		case 2:
+			g.Left()
+		case 3:
+			g.Right()
+		}
 
-	// Some permutations aren't solvable!
-	// This fix only works for 3x2 board.
-	// TODO: make work for nxk boards
-	for CountInversions(g.tiles)%2 == 1 {
-		g.tiles = rand.Perm(g.length)
 	}
-
-	g.gap = g.length - 1
 }
 
 func (g *Game) Tile(i int) string {

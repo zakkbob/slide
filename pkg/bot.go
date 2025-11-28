@@ -35,7 +35,7 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 				":one:", ":two:", ":three:", ":four:", ":five:", ":six:",
 			}
 			game := NewGame(solution, 3, 2, ":blank:")
-			game.Randomise()
+			game.DoRandomMoves(4)
 
 			a.startGame(s.ChannelID, game)
 		default:
