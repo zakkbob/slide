@@ -27,7 +27,7 @@ func ActionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Error("Received action", "host", r.Host)
+	logger.Info("Received action", "host", r.Host)
 
 	app := pkg.Application{
 		Debug:  debug,
