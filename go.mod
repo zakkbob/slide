@@ -1,6 +1,6 @@
 module github.com/zakkbob/slide
 
-go 1.24.5
+go 1.25.4
 
 require (
 	github.com/slack-go/slack v0.17.3
