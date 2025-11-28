@@ -41,13 +41,13 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 			case 2:
 				width, err = strconv.Atoi(args[0])
 				if err != nil {
-					a.Logger.Error("Received invalid command arguments", "command", s.Command, "args", s.Text)
+					a.Logger.Error("Failed to parse command arguments", "command", s.Command, "args", s.Text)
 					w.WriteHeader(http.StatusBadRequest)
 					return
 				}
 				height, err = strconv.Atoi(args[1])
 				if err != nil {
-					a.Logger.Error("Received invalid command arguments", "command", s.Command, "args", s.Text)
+					a.Logger.Error("Failed to parse command arguments", "command", s.Command, "args", s.Text)
 					w.WriteHeader(http.StatusBadRequest)
 					return
 				}
@@ -58,7 +58,7 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 					return
 				}
 			default:
-				a.Logger.Error("Received invalid command arguments", "command", s.Command, "args", s.Text)
+				a.Logger.Error("Received invalid number of command arguments", "command", s.Command, "args", s.Text, "count", len(args))
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
