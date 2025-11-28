@@ -42,6 +42,8 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 			if len(args) != 0 {
 				switch args[0] {
 				case "default":
+					args = args[1:]
+
 					if !(len(args) == 2 || len(args) == 3) {
 						a.Logger.Error("Received invalid number of command arguments", "command", s.Command, "args", s.Text, "count", len(args))
 						w.WriteHeader(http.StatusBadRequest)
