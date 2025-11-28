@@ -18,6 +18,15 @@ func TestCountInversions(t *testing.T) {
 	assert.Equal(t, pkg.CountInversions(arr), 3)
 }
 
+func TestRandomMoves(t *testing.T) {
+	solution := []string{
+		"1", "2", "3", "4", "5", "6",
+	}
+	game := pkg.NewGame(solution, 3, 2, "-")
+	game.DoRandomMoves(10)
+	t.Log(game.String())
+}
+
 func TestNewGame(t *testing.T) {
 	solution := []string{
 		"1", "2", "3", "4", "5", "6",
