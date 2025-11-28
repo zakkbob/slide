@@ -31,15 +31,15 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 			return
 		}
 
-		a.Logger.Error("Handling slash command", "command", s.Command, "args", s.Text)
+		args := strings.Split(strings.Trim(s.Text, " "), " ")
+
+		a.Logger.Error("Handling slash command", "command", s.Command, "text", s.Text, "args", args, "argCount", len(args))
 
 		var game Game
 
 		switch s.Command {
 		case "/slide-test":
-			width, height := 2, 3
-
-			args := strings.Split(strings.Trim(s.Text, " "), " ") // <width> <height>
+			width, height := 3, 2
 
 			if len(args) != 0 {
 				switch args[0] {
@@ -89,7 +89,7 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 				solution := []string{
 					":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:", ":nine:",
 				}
-				game = NewGame(solution, 3, 2, ":blank:")
+				game = NewGame(solution, width, height, ":blank:")
 				game.DoRandomMoves(game.length * 10)
 			}
 
