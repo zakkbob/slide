@@ -90,6 +90,7 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 				case "custom":
 					gameString := strings.Trim(s.Text[len(args[0])+1:], " ")
 					game = GameFromString(gameString)
+					game.gap = game.length - 1
 				}
 			}
 
