@@ -64,7 +64,7 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 			}
 
 			if len(args) == 3 {
-				moves, err = strconv.Atoi(args[3])
+				moves, err = strconv.Atoi(args[2])
 				if err != nil {
 					a.Logger.Error("Failed to parse command arguments", "command", s.Command, "args", s.Text)
 					w.WriteHeader(http.StatusBadRequest)
