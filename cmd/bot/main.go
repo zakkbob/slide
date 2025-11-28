@@ -10,7 +10,6 @@ import (
 	"github.com/zakkbob/slide/pkg"
 )
 
-
 func main() {
 	debug := flag.Bool("debug", false, "Debug Mode")
 	apikey := flag.String("apikey", "", "API Key")
@@ -25,7 +24,11 @@ func main() {
 
 	client := slack.New(*apikey, slack.OptionDebug(*debug))
 
-	app := pkg.NewApplication(*debug, client, logger)
+	app := pkg.Application{
+		Debug:  *debug,
+		Client: client,
+		Logger: logger,
+	}
 
 	http.HandleFunc("POST /action", app.HandleAction())
 	http.HandleFunc("POST /slash", app.HandleSlash())

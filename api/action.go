@@ -19,18 +19,21 @@ func ActionHandler(w http.ResponseWriter, r *http.Request) {
 
 	debug := false
 	apikey := os.Getenv("SLACK_API_KEY")
-
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	logger.Info("test")
-
 	if apikey == "" {
+		logger.Error("Received action, but SLACK_API_KEY is not set")
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
-	client := slack.New(apikey, slack.OptionDebug(debug))
+	logger.Error("Received action", "host", r.Host)
 
-	app := pkg.NewApplication(debug, client, logger)
+	app := pkg.Application{
+		Debug:  debug,
+		Client: slack.New(apikey, slack.OptionDebug(debug)),
+		Logger: logger,
+	}
 
 	app.HandleAction()(w, r)
 }

@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -10,37 +11,19 @@ import (
 	"github.com/slack-go/slack"
 )
 
+var (
+	ErrFailedToCreateGameString = errors.New("Failed to create game string")
+)
+
 type Application struct {
-	debug  bool
-	client *slack.Client
-	logger *slog.Logger
-}
-
-func NewApplication(debug bool, client *slack.Client, logger *slog.Logger) Application {
-	return Application{
-		debug:  debug,
-		client: client,
-		logger: logger,
-	}
-}
-
-func (a *Application) gameString(i slack.InteractionCallback) string {
-	for _, block := range i.Message.Blocks.BlockSet {
-		if block.ID() == "game" && block.BlockType() == slack.MBTSection {
-			sectionBlock, ok := block.(*slack.SectionBlock)
-			if ok {
-				return sectionBlock.Text.Text
-			}
-			panic("not okay!!")
-		}
-	}
-	panic("aghhh")
+	Debug  bool
+	Client *slack.Client
+	Logger *slog.Logger
 }
 
 func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		s, err := slack.SlashCommandParse(r)
-
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -56,6 +39,7 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 
 			a.startGame(s.ChannelID, game)
 		default:
+			a.Logger.Error("Received unknown command", "command", s.Command)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -68,7 +52,7 @@ func (a *Application) HandleAction() func(w http.ResponseWriter, r *http.Request
 
 		err := json.Unmarshal([]byte(r.FormValue("payload")), &i)
 		if err != nil {
-			a.logger.Error(err.Error())
+			a.Logger.Error("Failed to handle action", "error", err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -79,7 +63,10 @@ func (a *Application) HandleAction() func(w http.ResponseWriter, r *http.Request
 		for _, actionStr := range i.ActionCallback.BlockActions {
 			json.Unmarshal([]byte(actionStr.ActionID), &a)
 
-			gameStr := a.gameString(i)
+			gameStr, err := a.gameString(i)
+			if err != nil {
+				a.Logger.Error("Failed to handle action", "error", err.Error())
+			}
 
 			game := GameFromString(gameStr)
 
@@ -94,12 +81,27 @@ func (a *Application) HandleAction() func(w http.ResponseWriter, r *http.Request
 				game.Down()
 			}
 
-			err := a.updateGame(channelID, timestamp, game)
+			err = a.updateGame(channelID, timestamp, game)
 			if err != nil {
-				panic(err.Error())
+				a.Logger.Error("Failed to update game", "error", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
 			}
 		}
 	}
+}
+
+func (a *Application) gameString(i slack.InteractionCallback) (string, error) {
+	for _, block := range i.Message.Blocks.BlockSet {
+		if block.ID() == "game" && block.BlockType() == slack.MBTSection {
+			sectionBlock, ok := block.(*slack.SectionBlock)
+			if ok {
+				return sectionBlock.Text.Text, nil
+			}
+			return "", ErrFailedToCreateGameString
+		}
+	}
+	return "", ErrFailedToCreateGameString
 }
 
 func (a *Application) msgOption(game string) slack.MsgOption {
@@ -126,20 +128,19 @@ func (a *Application) msgOption(game string) slack.MsgOption {
 }
 
 func (a *Application) startGame(channelID string, game Game) error {
-	_, timestamp, err := a.client.PostMessage(channelID, a.msgOption(game.String()))
+	_, timestamp, err := a.Client.PostMessage(channelID, a.msgOption(game.String()))
 	if err != nil {
+		a.Logger.Info("Failed to start a new game", "channel", channelID, "error", err)
 		return fmt.Errorf("failed to start game: %v", err)
 	}
-
-	a.logger.Info("Made a post!", "timestamp", timestamp)
+	a.Logger.Info("Started a new game", "timestamp", timestamp, "channel", channelID)
 	return nil
 }
 
 func (a *Application) updateGame(channelID string, timestamp string, game Game) error {
-	_, _, _, err := a.client.UpdateMessage(channelID, timestamp, a.msgOption(game.String()))
+	_, _, _, err := a.Client.UpdateMessage(channelID, timestamp, a.msgOption(game.String()))
 	if err != nil {
 		return fmt.Errorf("failed to update game: %v", err)
 	}
-
 	return nil
 }
