@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/slack-go/slack"
-	"github.com/zakkbob/slide/internal"
+	"github.com/zakkbob/slide/pkg"
 )
 
 func ActionHandler(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +29,7 @@ func ActionHandler(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info("Received action", "host", r.Host)
 
-	app := internal.Application{
+	app := pkg.Application{
 		Debug:  debug,
 		Client: slack.New(apikey, slack.OptionDebug(debug)),
 		Logger: logger,

@@ -1,21 +1,21 @@
-package internal_test
+package pkg_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/zakkbob/slide/internal"
+	"github.com/zakkbob/slide/pkg"
 )
 
 func TestCountInversions(t *testing.T) {
 	arr := []int{1, 2, 3, 4}
-	assert.Equal(t, internal.CountInversions(arr), 0)
+	assert.Equal(t, pkg.CountInversions(arr), 0)
 
 	arr = []int{1, 2, 4, 3}
-	assert.Equal(t, internal.CountInversions(arr), 1)
+	assert.Equal(t, pkg.CountInversions(arr), 1)
 
 	arr = []int{2, 1, 0, 3, 5, 6, 4}
-	assert.Equal(t, internal.CountInversions(arr), 3)
+	assert.Equal(t, pkg.CountInversions(arr), 3)
 }
 
 func TestNewGame(t *testing.T) {
@@ -25,7 +25,7 @@ func TestNewGame(t *testing.T) {
 
 	expected := "-23\n456\n"
 
-	game := internal.NewGame(solution, 3, 2, "-")
+	game := pkg.NewGame(solution, 3, 2, "-")
 
 	assert.Equal(t, expected, game.String())
 }
@@ -38,7 +38,7 @@ func TestGameUpDown(t *testing.T) {
 	downExpected := "-23\n456\n"
 	upExpected := "423\n-56\n"
 
-	game := internal.NewGame(solution, 3, 2, "-")
+	game := pkg.NewGame(solution, 3, 2, "-")
 
 	game.Up()
 	assert.Equal(t, upExpected, game.String())
@@ -61,7 +61,7 @@ func TestGameLeftRight(t *testing.T) {
 	rightExpected := "-2\n34\n56\n"
 	leftExpected := "2-\n34\n56\n"
 
-	game := internal.NewGame(solution, 2, 3, "-")
+	game := pkg.NewGame(solution, 2, 3, "-")
 
 	game.Left()
 	assert.Equal(t, leftExpected, game.String(), "Left() should move the gap to the right")
