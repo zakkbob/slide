@@ -31,6 +31,7 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 
 		switch s.Command {
 		case "/slide-test":
+			a.Logger.Info("text?", "text", s.Text)
 			solution := []string{
 				":one:", ":two:", ":three:", ":four:", ":five:", ":six:",
 			}
