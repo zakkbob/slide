@@ -31,6 +31,8 @@ func (a *Application) HandleSlash() func(w http.ResponseWriter, r *http.Request)
 			return
 		}
 
+		a.Logger.Error("Handling slash command", "command", s.Command, "args", s.Text)
+
 		var game Game
 
 		switch s.Command {
