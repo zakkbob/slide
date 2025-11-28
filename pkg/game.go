@@ -19,11 +19,11 @@ type Game struct {
 }
 
 func GameFromString(s string) Game {
-	height := strings.Count(s, "\n")
-
 	regex := regexp.MustCompile(":.*?:")
 	solution := regex.FindAllString(s, -1)
+	firstRow := strings.Split(s, "\n")[0]
 
+	width := len(regex.FindAllString(firstRow, -1))
 	length := len(solution)
 
 	// Okay, so turns out i forgot about the solution thing. So this is a hacky fix for now. Might need a database :(
@@ -36,9 +36,9 @@ func GameFromString(s string) Game {
 	return Game{
 		solution: solution,
 		tiles:    tiles,
-		height:   height,
+		height:   length / width,
 		length:   length,
-		width:    length / height,
+		width:    width,
 		gapVal:   ":blank:",
 		gap:      slices.Index(solution, ":blank:"),
 	}
